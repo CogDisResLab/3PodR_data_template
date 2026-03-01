@@ -82,7 +82,7 @@ docker run --rm \
   -e R_LIBS_USER=/opt/renv/library \
   -e R_PROFILE_USER=/dev/null \
   cdrl/3podr_container:latest \
-  "/data/configuration.yml"
+  "configuration.yml"
 
 # --- 5. VERIFY ---
 
