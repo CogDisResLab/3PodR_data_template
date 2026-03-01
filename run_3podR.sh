@@ -64,20 +64,32 @@ echo "✅ Docker engine is ready!"
 # --- 3. PREPARE LOCAL ENVIRONMENT ---
 mkdir -p results
 
+# ... (Sections 1, 2, and 3 remain the same) ...
+
 # --- 4. PULL AND RUN ---
 echo "📥 Pulling latest container..."
 docker pull cdrl/3podr_container:latest
 
 echo "📊 Running 3PodR Report..."
-# Using $(pwd) with Windows path translation logic
+
+# THE FIX: 
+# 1. We mount your local directory to /project/results so the container can write "out".
+# 2. We tell R to render the file from its INTERNAL path (/opt/3podr/index.Rmd).
+# 3. We tell R to save the output to the MOUNTED path (/project/results).
+
 docker run --rm \
+  -v "$(pwd)/results":/project/results \
   -e R_LIBS_USER=/opt/renv/library \
   -e R_PROFILE_USER=/dev/null \
-  -v "$(pwd)":/project \
-  -v "$(pwd)/results":/project/results \
-  --entrypoint R \
   cdrl/3podr_container:latest \
-  -e 'bookdown::render_book("index.Rmd", output_dir = "results"); if(exists("global_state")) saveRDS(global_state, "results/global_state.RDS")'
+  R -e 'bookdown::render_book("/opt/3podr/index.Rmd", output_dir = "/project/results"); if(exists("global_state")) saveRDS(global_state, "/project/results/global_state.RDS")'
 
-echo "✅ Done! Check the 'results' folder."
+# --- 5. VERIFY ---
+if [ -f "results/index.html" ] || [ -n "$(ls -A results)" ]; then
+    echo "✅ Done! Analysis successful. Files are in the 'results' folder."
+else
+    echo "❌ Error: Analysis finished but no files were found in 'results'."
+    echo "Check if /opt/3podr/index.Rmd is the correct path inside the container."
+    exit 1
+fi
 
