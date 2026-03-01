@@ -80,3 +80,4 @@ docker run --rm \
   -e 'bookdown::render_book("index.Rmd", output_dir = "results"); if(exists("global_state")) saveRDS(global_state, "results/global_state.RDS")'
 
 echo "✅ Done! Check the 'results' folder."
+
