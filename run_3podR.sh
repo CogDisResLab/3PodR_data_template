@@ -78,13 +78,14 @@ echo "📊 Running 3PodR Report..."
 # 3. We tell R to save the output to the MOUNTED path (/project/results).
 
 docker run --rm \
-  -v "$(pwd)/results":/project/results \
+  -v "$(pwd)":/data \
   -e R_LIBS_USER=/opt/renv/library \
   -e R_PROFILE_USER=/dev/null \
   cdrl/3podr_container:latest \
-  R -e 'bookdown::render_book("/opt/3podr/index.Rmd", output_dir = "/project/results"); if(exists("global_state")) saveRDS(global_state, "/project/results/global_state.RDS")'
+  "/data/configuration.yml"
 
 # --- 5. VERIFY ---
+
 if [ -f "results/index.html" ] || [ -n "$(ls -A results)" ]; then
     echo "✅ Done! Analysis successful. Files are in the 'results' folder."
 else
